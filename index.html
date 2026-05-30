@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Friend Who Skipped Therapy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Space+Mono:wght@400;700&display=swap');
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: #0b0b0d; }
+
+.tf-root {
+  --bg: #0b0b0d;
+  --panel: #141417;
+  --ink: #f4f2ea;
+  --muted: #82828c;
+  --accent: #c6f135;
+  font-family: 'Space Mono', ui-monospace, monospace;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.tf-root::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(60% 50% at 82% -5%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%),
+    radial-gradient(48% 42% at -5% 105%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 70%);
+  transition: background .5s ease;
+}
+.tf-noise {
+  position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .045; mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.tf-shell { max-width: 940px; margin: 0 auto; padding: 30px 18px 70px; position: relative; z-index: 1; }
+
+.tf-kicker { font-size: 10.5px; letter-spacing: .28em; color: var(--accent); font-weight: 700; }
+.tf-title {
+  font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800;
+  font-size: clamp(31px, 7.5vw, 58px); line-height: .96; letter-spacing: -.02em;
+  margin: 8px 0 10px;
+}
+.tf-flick { color: var(--accent); animation: tf-flicker 6s infinite steps(1); }
+.tf-sub { color: var(--muted); font-size: 13.5px; max-width: 60ch; line-height: 1.55; }
+.tf-sub b { color: var(--ink); font-weight: 700; }
+
+.tf-tabs { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+.tf-tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.14); background: transparent; color: var(--ink);
+  font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700;
+  transition: transform .12s ease, border-color .15s, box-shadow .2s, color .15s, background .15s;
+}
+.tf-tab:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--tabc) 60%, transparent); }
+.tf-tab.on { color: #0b0b0d; background: var(--tabc); border-color: var(--tabc); box-shadow: 0 0 22px color-mix(in srgb, var(--tabc) 55%, transparent); }
+
+.tf-toolhead { margin: 30px 0 18px; }
+.tf-toolhead .lbl { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .2em; color: var(--accent); font-weight: 700; }
+.tf-toolhead .desc { color: var(--ink); opacity: .82; font-size: 14px; margin-top: 8px; line-height: 1.5; }
+
+.panel { display: none; }
+.panel.on { display: block; }
+
+.tf-section-label { font-size: 11px; letter-spacing: .18em; color: var(--muted); font-weight: 700; margin: 0 0 10px; text-transform: uppercase; }
+
+.tf-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tf-chip {
+  padding: 8px 12px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px;
+  background: transparent; color: var(--ink); font-family: 'Space Mono', monospace; font-size: 12.5px;
+  cursor: pointer; transition: border-color .15s, background .15s, transform .1s, color .15s;
+}
+.tf-chip:hover { border-color: var(--accent); transform: translateY(-1px); }
+.tf-chip.on { background: var(--accent); color: #0b0b0d; border-color: var(--accent); font-weight: 700; box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+.tf-btn {
+  display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
+  padding: 13px 20px; border: none; border-radius: 12px;
+  background: var(--accent); color: #0b0b0d;
+  font-family: 'Space Mono', monospace; font-weight: 700; font-size: 14px; letter-spacing: .04em; text-transform: uppercase;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.55);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.tf-btn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 rgba(0,0,0,.55); }
+.tf-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(0,0,0,.55); }
+.tf-btn.ghost { background: transparent; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); box-shadow: none; }
+.tf-btn.ghost:hover { transform: translateY(-1px); box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent); }
+.tf-btn svg, .tf-tab svg, .tf-copy svg { flex: none; }
+
+.tf-btnrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
+.tf-hint { color: var(--muted); font-size: 12px; }
+
+.tf-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; outline: none; margin: 4px 0;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 25%, #2a2a2e)); }
+.tf-range::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #0b0b0d; border: 3px solid var(--accent); box-shadow: 0 0 14px var(--accent); cursor: pointer; }
+.tf-range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #0b0b0d; border: 3px solid var(--accent); box-shadow: 0 0 14px var(--accent); cursor: pointer; }
+.tf-ticks { display: flex; justify-content: space-between; gap: 4px; margin-top: 10px; }
+.tf-tick { font-size: 9.5px; letter-spacing: .06em; color: var(--muted); font-weight: 700; text-align: center; flex: 1; transition: color .15s, transform .15s; }
+.tf-tick.on { color: var(--accent); transform: scale(1.08); }
+
+.tf-textarea {
+  width: 100%; min-height: 96px; resize: vertical; padding: 14px 15px; border-radius: 12px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.14); color: var(--ink);
+  font-family: 'Space Mono', monospace; font-size: 14px; line-height: 1.5; outline: none; transition: border-color .15s, box-shadow .2s;
+}
+.tf-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.tf-textarea::placeholder { color: var(--muted); }
+
+.tf-out {
+  margin-top: 20px; background: var(--panel); border: 1px solid color-mix(in srgb, var(--accent) 32%, #2a2a2e);
+  border-radius: 16px; padding: 22px 22px 22px 26px; position: relative; overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35); animation: tf-rise .36s cubic-bezier(.2,.7,.3,1) both;
+}
+.tf-out::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+.tf-badge { display: inline-block; font-size: 10.5px; letter-spacing: .14em; padding: 4px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); font-weight: 700; }
+.tf-msg { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 500; font-size: clamp(18px, 3.6vw, 23px); line-height: 1.32; margin: 14px 0 2px; }
+.tf-quote-mark { font-family: 'Bricolage Grotesque', sans-serif; color: var(--accent); font-weight: 800; opacity: .5; }
+
+.tf-rname { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(22px, 4.8vw, 30px); line-height: 1.05; padding-right: 40px; }
+.tf-vibe { font-style: italic; color: var(--muted); margin-top: 8px; font-size: 13.5px; line-height: 1.45; }
+.tf-rsub { font-size: 10.5px; letter-spacing: .16em; color: var(--accent); font-weight: 700; margin: 18px 0 8px; text-transform: uppercase; }
+.tf-ul { margin: 0; padding-left: 18px; }
+.tf-ul li { margin: 5px 0; font-size: 14px; line-height: 1.45; }
+.tf-ol { margin: 0; padding-left: 20px; }
+.tf-ol li { margin: 7px 0; font-size: 14px; line-height: 1.5; }
+.tf-callout { margin-top: 16px; padding: 13px 15px; border-left: 3px solid var(--accent); background: rgba(255,255,255,.035); font-size: 13.5px; line-height: 1.5; border-radius: 0 8px 8px 0; }
+.tf-callout .who { font-size: 10px; letter-spacing: .14em; color: var(--accent); font-weight: 700; display: block; margin-bottom: 5px; }
+
+.tf-opener { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 500; font-size: clamp(17px, 3.4vw, 21px); line-height: 1.3; margin: 12px 0 16px; }
+.tf-roasts { list-style: none; margin: 0; padding: 0; }
+.tf-roasts li { display: flex; gap: 11px; margin: 11px 0; font-size: 14px; line-height: 1.48; }
+.tf-roasts li .x { color: var(--accent); font-weight: 800; flex: none; }
+
+.tf-copy { position: absolute; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.14); color: var(--muted);
+  border-radius: 8px; padding: 6px 10px; font-family: 'Space Mono', monospace; font-size: 11px; transition: .15s; }
+.tf-copy:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.tf-copy.done { color: var(--accent); border-color: var(--accent); }
+
+.tf-foot { margin-top: 44px; border-top: 1px dashed rgba(255,255,255,.13); padding-top: 18px; color: var(--muted); font-size: 11.5px; line-height: 1.7; }
+.tf-foot b { color: color-mix(in srgb, var(--ink) 80%, transparent); }
+.tf-foot svg { vertical-align: middle; }
+
+@keyframes tf-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes tf-flicker { 0%,18%,20%,50%,52%,99%,100% { opacity: 1; } 19%,51% { opacity: .35; } }
+</style>
+</head>
+<body>
+<div class="tf-root" id="root">
+  <div class="tf-noise"></div>
+  <div class="tf-shell">
+    <header>
+      <div class="tf-kicker">▚ FRIDAY BUILD · TOKENS: BURNING · NO THERAPY DETECTED ▞</div>
+      <h1 class="tf-title">THE FRIEND WHO<br><span class="tf-flick">SKIPPED THERAPY</span></h1>
+      <p class="tf-sub">All the chaos, none of the boundaries. <b>~230 hand-written bad decisions</b>, zero live AI, instant every time. Pick a tool, cause some problems.</p>
+    </header>
+
+    <nav class="tf-tabs" id="tabs"></nav>
+
+    <div class="tf-toolhead" id="toolhead"></div>
+
+    <section class="panel" id="panel-tone">
+      <p class="tf-section-label">1 · Pick the situation</p>
+      <div class="tf-chips" id="tone-chips"></div>
+      <div class="tf-btnrow"><button class="tf-btn ghost" id="tone-surprise"></button></div>
+      <p class="tf-section-label" style="margin-top:26px">2 · Drag the dial</p>
+      <input class="tf-range" id="tone-range" type="range" min="0" max="4" step="1" value="0" aria-label="tone intensity">
+      <div class="tf-ticks" id="tone-ticks"></div>
+      <div id="tone-out"></div>
+    </section>
+
+    <section class="panel" id="panel-chef">
+      <p class="tf-section-label">What's in the fridge? (optional — or just hit cook)</p>
+      <div class="tf-chips" id="chef-ings"></div>
+      <div class="tf-btnrow">
+        <button class="tf-btn" id="chef-cook"></button>
+        <button class="tf-btn ghost" id="chef-clear">clear</button>
+        <span class="tf-hint" id="chef-hint"></span>
+      </div>
+      <div id="chef-out"></div>
+    </section>
+
+    <section class="panel" id="panel-devil">
+      <p class="tf-section-label">Pitch me your plan</p>
+      <textarea class="tf-textarea" id="devil-input" placeholder="e.g. I'm going to wake up at 5am every day and finally get fit"></textarea>
+      <div class="tf-chips" id="devil-examples" style="margin-top:12px"></div>
+      <div class="tf-btnrow">
+        <button class="tf-btn" id="devil-destroy"></button>
+        <span class="tf-hint">brutal, but it's because I care</span>
+      </div>
+      <div id="devil-out"></div>
+    </section>
+
+    <section class="panel" id="panel-excuse">
+      <p class="tf-section-label">1 · Who needs an excuse?</p>
+      <div class="tf-chips" id="excuse-cats"></div>
+      <p class="tf-section-label" style="margin-top:26px">2 · How believable?</p>
+      <input class="tf-range" id="excuse-range" type="range" min="0" max="4" step="1" value="0" aria-label="believability">
+      <div class="tf-ticks" id="excuse-ticks"></div>
+      <div class="tf-btnrow">
+        <button class="tf-btn" id="excuse-roll"></button>
+        <span class="tf-hint">freshly fabricated, no two the same</span>
+      </div>
+      <div id="excuse-out"></div>
+    </section>
+
+    <footer class="tf-foot">
+      <b>THE FRIEND WHO SKIPPED THERAPY</b> — a Friday artifact. <span id="ic-spark"></span> ~230 hand-written responses, zero live AI, fully offline.<br>
+      This friend did not go to therapy and is not a substitute for therapy, a lawyer, a doctor, or a functioning meal plan. <span id="ic-flame"></span> Use responsibly. Or don't. He won't judge — that was the whole point.
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ============================== DATA ============================== */
+const TONE_LEVELS = ["FERAL", "UNFILTERED", "HUMAN", "CORPORATE", "LEGAL-APPROVED"];
+
+const SCENARIOS = [
+  { id: "late", label: "Telling your boss you're late", levels: [
+    `im not coming in on time. the bed won. tell HR the bed won.`,
+    `running late. woke up, immediately disagreed with being awake, and lost.`,
+    `Hey, running about 20 min behind this morning — be there ASAP, sorry!`,
+    `Good morning! Flagging that I'll be joining slightly later than planned. Apologies for any disruption — online by 9:30.`,
+    `Please be advised that, owing to circumstances beyond reasonable control, my arrival is delayed. No admission of fault is implied by this message.`,
+  ]},
+  { id: "passive", label: "Replying to a passive-aggressive email", levels: [
+    `i did read it. i chose violence. anyway, no.`,
+    `per YOUR last email, you also can't spell "definitely," so let's both calm down.`,
+    `Thanks for the nudge! I did see it — here's where things actually stand.`,
+    `Appreciate the follow-up. To close the loop, here's the latest status and the next steps.`,
+    `Acknowledging receipt of your prior correspondence. A response addressing each item is provided below for the record.`,
+  ]},
+  { id: "raise", label: "Asking for a raise", levels: [
+    `pay me or i become a problem. a fun problem. but a problem.`,
+    `i do the work of three people and two of them are imaginary and better paid than me.`,
+    `I'd love to talk about my compensation — I think my growth this year makes a strong case.`,
+    `I'd like to schedule time to discuss my compensation in light of my expanded scope and contributions this year.`,
+    `I am formally requesting a review of my compensation, supported by documentation of responsibilities and outcomes, at your earliest convenience.`,
+  ]},
+  { id: "decline", label: "Declining an invitation", levels: [
+    `no. i was not built for plans. i was built for canceling them.`,
+    `can't make it — i already RSVP'd yes to lying on my floor that night.`,
+    `Ah, I can't make it this time, but thank you for thinking of me! Next one for sure.`,
+    `Thank you for the invitation. Unfortunately I have a prior commitment, but I hope it goes wonderfully.`,
+    `I respectfully decline the aforementioned invitation. This decision should not be construed as a reflection on the host or the event.`,
+  ]},
+  { id: "deadline", label: "Apologizing for a missed deadline", levels: [
+    `the deadline and i are no longer on speaking terms. it knows what it did.`,
+    `i didn't miss it. it missed ME. anyway it's late, sorry.`,
+    `Really sorry this is late — that's on me. Here it is, plus how I'll keep it on track going forward.`,
+    `Apologies for the delayed delivery. I take full ownership; the completed work is attached with an updated timeline.`,
+    `I acknowledge the delay in delivery. Please find the completed deliverable enclosed; mitigation steps have been implemented to prevent recurrence.`,
+  ]},
+  { id: "ex", label: "Texting your ex", levels: [
+    `was gonna play it cool but i typed 14 paragraphs and deleted all but "hey". hey.`,
+    `no reason for this text. economy's bad, thought of you, the usual.`,
+    `Hey — saw something that reminded me of you and figured I'd say hi. Hope you're doing well.`,
+    `Hi! Hope this finds you well. Wanted to reconnect briefly if you're open to it.`,
+    `This message is sent without obligation or expectation of reply. Any prior agreements between the parties remain dissolved.`,
+  ]},
+  { id: "quit", label: "Quitting your job", levels: [
+    `i quit. effective the second i hit send and possibly before. don't follow me to my car.`,
+    `putting in my two weeks but spiritually i left in March.`,
+    `I've decided to move on and wanted to tell you directly. My last day will be the 30th — happy to help with the transition.`,
+    `Please accept this as formal notice of my resignation, effective two weeks from today. I'm committed to a smooth handover.`,
+    `I hereby tender my resignation effective fourteen (14) days from the date of this notice, in accordance with the terms of my employment agreement.`,
+  ]},
+  { id: "feedback", label: "Responding to harsh feedback", levels: [
+    `interesting. anyway, here's my feedback on your feedback: no.`,
+    `noted. i'll take this to therapy and bill you for half.`,
+    `Thanks for being direct — some of this is hard to hear, but I want to understand it. Can we dig into a couple of points?`,
+    `I appreciate the candid feedback. I'd value the chance to discuss specifics so I can act on it effectively.`,
+    `I acknowledge the feedback provided. I request that any performance concerns be documented in writing for clarity and mutual reference.`,
+  ]},
+  { id: "followup", label: "Sending a follow-up (no reply)", levels: [
+    `this is my fourth email. the next one comes with a drone.`,
+    `gentle bump :) (it is not gentle. i have refreshed my inbox 40 times.)`,
+    `Just floating this back to the top of your inbox in case it got buried — no rush!`,
+    `Following up on the below to ensure it didn't slip through. Happy to provide anything further to move this forward.`,
+    `This constitutes a follow-up to prior correspondence, sent to confirm receipt and request a response within a reasonable period.`,
+  ]},
+  { id: "complaint", label: "Complaining to customer service", levels: [
+    `your product has betrayed me personally and i want it to know that.`,
+    `i've been on hold so long i've aged out of your target demographic.`,
+    `Hi — I'm having an issue with my order and hoping you can help me sort it out. Details below.`,
+    `I'm writing regarding a recent issue with my order and would appreciate your assistance in resolving it promptly.`,
+    `I am submitting a formal complaint regarding the product identified below and request remedy in accordance with applicable consumer protections.`,
+  ]},
+];
+
+const INGREDIENTS = ["eggs", "bread", "cheese", "instant noodles", "rice", "beans", "hot sauce", "peanut butter", "banana", "ketchup", "frozen peas", "tortilla", "leftover pizza", "cereal", "tuna", "mystery sauce"];
+
+const RECIPES = [
+  { name: `Depression Quesadilla`, tags: ["tortilla", "cheese"], vibe: `the only thing standing between you and the void is one (1) tortilla.`,
+    ingredients: [`1 tortilla`, `whatever cheese has not yet developed a personality`, `optional: hope`],
+    steps: [`Put cheese on tortilla.`, `Fold. Heat in a pan until the cheese stops resisting.`, `Eat over the sink so there are no witnesses.`],
+    chef: `Four-star meal, zero-star life choices. We balance.` },
+  { name: `2 AM Cereal Risotto (it's just cereal)`, tags: ["cereal"], vibe: `we're calling it risotto for emotional reasons.`,
+    ingredients: [`cereal`, `milk, or the concept of milk`, `a bowl you'll deny using`],
+    steps: [`Pour cereal. Pour milk. Do not measure — you've lost that privilege.`, `Stand in the dark of your kitchen.`, `Crunch aggressively to assert dominance over the night.`],
+    chef: `Michelin will not return my calls and frankly that's on them.` },
+  { name: `Pantry Roulette Noodles`, tags: ["instant noodles", "hot sauce"], vibe: `instant noodles, but make it a dare.`,
+    ingredients: [`instant noodles`, `every condiment in the door of your fridge`, `courage`],
+    steps: [`Cook noodles. Drain half the water, keep the rest for "broth" (it's not broth).`, `Add condiments one at a time, whispering "trust" before each.`, `Stir. Taste. Regret nothing, or everything.`],
+    chef: `This is less a recipe and more a personality test.` },
+  { name: `The Sad Banana Situation`, tags: ["banana", "peanut butter"], vibe: `for when the banana has more bruises than you do.`,
+    ingredients: [`1 bruised banana`, `peanut butter scraped from the jar's final hour`, `bread, if available`],
+    steps: [`Smear peanut butter on banana. That's the whole move.`, `If bread exists, fold the banana into it like a tiny tragic burrito.`, `Eat. Feel briefly like a functioning adult.`],
+    chef: `Potassium and emotional damage, together at last.` },
+  { name: `Beans. Just Beans.`, tags: ["beans", "hot sauce"], vibe: `a can of beans, staring back at you, friend to friend.`,
+    ingredients: [`1 can of beans`, `hot sauce`, `a spoon and a dream`],
+    steps: [`Open can. (Optional: heat. The beans don't care. You don't care.)`, `Add hot sauce until you feel something.`, `Eat directly from the can like the protagonist you are.`],
+    chef: `Fiber is the only thing in this kitchen with structure.` },
+  { name: `Leftover Pizza Frittata (Crime Edition)`, tags: ["leftover pizza", "eggs"], vibe: `we're putting eggs on the pizza. yes. we are doing that.`,
+    ingredients: [`cold leftover pizza, chopped into evidence`, `2 eggs`, `cheese, because why stop now`],
+    steps: [`Chop the pizza into pieces. Apologize to it.`, `Beat eggs, pour over the pizza in a hot pan.`, `Cook until set. You have invented a food that should not exist but does.`],
+    chef: `This is what they mean by "innovation." I'm so sorry.` },
+  { name: `Tuna Surprise (the surprise is despair)`, tags: ["tuna", "mystery sauce"], vibe: `the surprise is that you ate this.`,
+    ingredients: [`1 can tuna`, `that one sauce with no label`, `crackers, optimistically`],
+    steps: [`Drain tuna. Mix with the unlabeled sauce. This is a leap of faith.`, `Smear on crackers, or eat with a fork like a raccoon CEO.`, `Brush your teeth twice afterward as an apology to society.`],
+    chef: `I'd tell you what's in the sauce but neither of us knows.` },
+  { name: `Rice and Vibes`, tags: ["rice", "hot sauce"], vibe: `a bowl of rice and the sheer force of your will.`,
+    ingredients: [`leftover rice`, `hot sauce, soy sauce, or tears`, `1 egg if you're fancy`],
+    steps: [`Fry the rice in a hot pan until it stops being sad and starts being crispy.`, `Add a sauce of choice. Crack an egg in if you've earned it.`, `Eat standing up to save on dishes and dignity.`],
+    chef: `The rice believes in you even when you don't.` },
+  { name: `Ketchup Soup (do not)`, tags: ["ketchup"], vibe: `tomato soup's estranged cousin who owes everyone money.`,
+    ingredients: [`ketchup`, `hot water`, `a single dying herb, if you have one`],
+    steps: [`Squeeze ketchup into a mug. A lot. Be honest with yourself.`, `Add hot water. Stir. Pretend it's from a deli.`, `Garnish with the herb to feel something. Sip. Question everything.`],
+    chef: `This is a cry for help that I have chosen to validate.` },
+  { name: `Frozen Pea Caviar`, tags: ["frozen peas"], vibe: `luxury for people who own one (1) bag of frozen peas.`,
+    ingredients: [`frozen peas`, `butter or oil`, `salt and delusion`],
+    steps: [`Toss peas in a hot pan with butter until bright green and slightly blistered.`, `Salt generously. Plate them in a tiny pile.`, `Refer to them as "the pea course" for the rest of the day.`],
+    chef: `Fine dining is mostly confidence and we have plenty here.` },
+  { name: `Toast, But With Intent`, tags: ["bread"], vibe: `bread, browned, against all odds.`,
+    ingredients: [`bread`, `whatever spread survived`, `a positive attitude (optional)`],
+    steps: [`Toast the bread to a shade between "golden" and "I forgot about it."`, `Apply spread. Or don't. Live freely.`, `Eat while walking somewhere, because you are busy and important.`],
+    chef: `The little victories. This is one of the littler ones.` },
+  { name: `Cheese Brick`, tags: ["cheese", "bread"], vibe: `grilled cheese for people who've given up on subtlety.`,
+    ingredients: [`bread x2`, `all the cheese`, `butter, courage`],
+    steps: [`Butter the bread. Stack cheese like you're hiding something.`, `Grill in a pan, pressing down with a spatula and your unresolved issues.`, `Cut diagonally — this doubles the deliciousness, scientifically.`],
+    chef: `There is no problem a cheese brick cannot temporarily delay.` },
+  { name: `Egg in a Hole of Mystery`, tags: ["eggs", "bread"], vibe: `an egg, a hole, a journey.`,
+    ingredients: [`bread`, `1 egg`, `butter`],
+    steps: [`Tear a hole in the bread with your bare hands like an animal.`, `Fry in butter, crack the egg into the hole.`, `Flip when brave. Eat the little toasted circle as a reward.`],
+    chef: `The hole represents the part of your soul that wanted brunch.` },
+  { name: `Peanut Butter Noodles (Allegedly)`, tags: ["instant noodles", "peanut butter"], vibe: `fancy peanut noodles if you squint and lie.`,
+    ingredients: [`instant noodles`, `peanut butter`, `hot sauce, soy sauce if available`],
+    steps: [`Cook noodles, save a splash of the water.`, `Stir peanut butter and a little noodle water into a "sauce."`, `Toss the noodles in it. Add hot sauce. Tell people it's Thai-inspired.`],
+    chef: `Inspired by Thailand the way I'm inspired by going to the gym.` },
+  { name: `Beans on Toast (The Respectable One)`, tags: ["beans", "bread"], vibe: `the only dish here with a passport.`,
+    ingredients: [`beans`, `bread`, `cheese, if you're celebrating`],
+    steps: [`Toast bread. Heat beans (you can do this part, I believe in you).`, `Pour beans on toast. Add cheese on top so it melts.`, `Eat like a tired British person. You've earned the accent.`],
+    chef: `This one's almost a real meal. Don't get used to it.` },
+  { name: `The Refrigerator Confession`, tags: ["mystery sauce", "cheese", "leftover pizza"], vibe: `everything that's about to expire, in one heroic act.`,
+    ingredients: [`3 things expiring tomorrow`, `1 binding agent (egg / cheese / sauce)`, `a fork and zero fear`],
+    steps: [`Combine the doomed ingredients in a pan.`, `Bind them with the egg, cheese, or sauce until cohesive-ish.`, `Eat fast — before it achieves sentience or you achieve sense.`],
+    chef: `This meal exists so the food guilt can finally rest.` },
+  { name: `Sad Desk Rice Bowl`, tags: ["rice", "beans", "hot sauce"], vibe: `lunch eaten at your desk while a meeting happens around you.`,
+    ingredients: [`rice`, `beans`, `hot sauce, plus anything green to seem healthy`],
+    steps: [`Microwave rice and beans together in a sad bowl.`, `Add hot sauce and the green thing for the appearance of wellness.`, `Eat on mute while nodding at the screen.`],
+    chef: `Nutritionally complete. Spiritually a screensaver.` },
+  { name: `Tortilla Pizza of Last Resort`, tags: ["tortilla", "cheese", "ketchup"], vibe: `pizza, if pizza fell on extremely hard times.`,
+    ingredients: [`tortilla`, `ketchup (the "sauce")`, `cheese, any toppings clinging to life`],
+    steps: [`Spread ketchup on the tortilla. We both know it's not marinara. We proceed.`, `Add cheese and whatever toppings haven't left you.`, `Crisp in a pan or oven. Fold your standards along with the slice.`],
+    chef: `Italy has been notified and is, understandably, upset.` },
+  { name: `Cereal Milk Smoothie`, tags: ["cereal", "banana"], vibe: `breakfast and dessert have stopped fighting and merged.`,
+    ingredients: [`leftover cereal`, `milk`, `1 banana for texture and legitimacy`],
+    steps: [`Blend cereal, milk, and banana until it resembles a drink, not a crime.`, `Pour into a glass to feel like a wellness influencer.`, `Drink. Post about it. Lie in the caption.`],
+    chef: `It's giving "smoothie bowl," but the bowl gave up.` },
+  { name: `Hot Sauce Soup (You Did This)`, tags: ["hot sauce"], vibe: `for when you want to feel alive, specifically through pain.`,
+    ingredients: [`hot sauce, an irresponsible amount`, `hot water or broth`, `crackers to absorb the consequences`],
+    steps: [`Combine hot sauce and hot water. Yes. That's the soup.`, `Crumble crackers in for body and plausible deniability.`, `Sip. Cry. Sip again. This is growth.`],
+    chef: `Capsaicin is just spicy adrenaline and I support your journey.` },
+  { name: `The Single Egg, Scrambled With Feeling`, tags: ["eggs"], vibe: `one egg. one pan. one tired person.`,
+    ingredients: [`1 egg`, `butter`, `salt and the will to continue`],
+    steps: [`Whisk the lonely egg. Whisper words of encouragement.`, `Scramble low and slow in butter for unreasonably good results.`, `Eat from the pan. The pan is now also your plate. Efficient.`],
+    chef: `A single egg, treated with respect, can carry a whole morning.` },
+  { name: `Tuna Melt for One (Painfully)`, tags: ["tuna", "cheese", "bread"], vibe: `a tuna melt, party of you.`,
+    ingredients: [`tuna`, `cheese`, `bread, mayo or sauce if it's around`],
+    steps: [`Mix tuna with mayo/sauce. Pile on bread, blanket with cheese.`, `Grill in a pan until melty, golden, and a little judgmental.`, `Eat. Open a window. The tuna deserves an audience; your roommates do not.`],
+    chef: `Smells like a decision. Tastes like a good one, weirdly.` },
+  { name: `Microwave Mug "Omelette"`, tags: ["eggs", "cheese"], vibe: `an omelette that has never seen a stove and never will.`,
+    ingredients: [`2 eggs`, `cheese`, `a mug you trust`],
+    steps: [`Beat eggs and cheese in the mug. Add anything chopped and small.`, `Microwave in 30-second bursts, stopping before it explodes (it wants to).`, `Eat with a fork straight from the mug. Behold: science.`],
+    chef: `It's an omelette the way a scooter is a motorcycle. Close enough.` },
+  { name: `Banana "Ice Cream" (It's Frozen Banana)`, tags: ["banana", "peanut butter"], vibe: `dessert that's technically a fruit, so it cancels out.`,
+    ingredients: [`frozen banana`, `peanut butter`, `anything chocolate, in your soul`],
+    steps: [`Blend frozen banana until creamy and suspiciously like soft serve.`, `Swirl in peanut butter. Add chocolate if the day demands it.`, `Eat immediately, before it melts and exposes the truth.`],
+    chef: `Health food for people who don't mean it. My favorite kind.` },
+  { name: `The Everything Wrap`, tags: ["tortilla", "rice", "beans", "cheese"], vibe: `if it fits in the tortilla, it's dinner.`,
+    ingredients: [`tortilla`, `rice, beans, cheese — the holy trinity of leftovers`, `hot sauce, obviously`],
+    steps: [`Warm the tortilla so it folds instead of fights.`, `Load with rice, beans, cheese, and whatever else is brave enough.`, `Wrap tight. Grill the seam. Eat before it structurally fails.`],
+    chef: `The burrito is humanity's greatest answer to "idk, stuff?"` },
+  { name: `Soy Sauce Rice (Minimalist Era)`, tags: ["rice"], vibe: `rice and one (1) condiment in perfect, bleak harmony.`,
+    ingredients: [`hot rice`, `soy sauce or hot sauce`, `an egg, if you've been good`],
+    steps: [`Pour sauce over hot rice. Mix until every grain is implicated.`, `Top with a fried or raw egg for sudden, unearned elegance.`, `Eat in three minutes flat. You have things to avoid doing.`],
+    chef: `Sometimes restraint is the dish. Sometimes you're just out of food.` },
+  { name: `Crunchy Peanut Butter Toast Deluxe`, tags: ["bread", "peanut butter", "banana"], vibe: `the breakfast of champions who overslept.`,
+    ingredients: [`toast`, `peanut butter`, `banana slices, a drizzle of anything sweet`],
+    steps: [`Toast bread, slather peanut butter while it's warm so it gets melty.`, `Lay banana slices on top in a pattern that says "I tried."`, `Drizzle honey or syrup. Eat. Briefly feel you have your life together.`],
+    chef: `Peak performance. The peak is small, but we're on it.` },
+  { name: `Instant Noodle Carbonara (Liar's Edition)`, tags: ["instant noodles", "eggs", "cheese"], vibe: `carbonara's chaotic intern who lied on the resume.`,
+    ingredients: [`instant noodles`, `1 egg`, `cheese, black pepper if you're committed to the bit`],
+    steps: [`Cook noodles, drain, but work fast while hot.`, `Off heat, stir in beaten egg + cheese so it goes creamy, not scrambled.`, `Crack pepper on top. Tell everyone you "studied in Rome."`],
+    chef: `An Italian grandmother just woke up angry and doesn't know why.` },
+  { name: `The Cheese and Cracker Board (Solo Gala)`, tags: ["cheese"], vibe: `a charcuterie board for a party of one (1) and zero shame.`,
+    ingredients: [`cheese, cut into "artisanal" chunks`, `crackers or bread`, `anything jarred and fancy-adjacent`],
+    steps: [`Arrange cheese, crackers, and the jarred thing on a plate with care.`, `Fan it out like it's for guests. There are no guests.`, `Eat slowly with a tiny knife. You are hosting yourself. Be a good host.`],
+    chef: `Solo charcuterie is just self-care with extra steps and brie.` },
+  { name: `Fridge-Door Stir-Fry`, tags: ["rice", "frozen peas", "eggs", "hot sauce"], vibe: `everything from the door, in a pan, going fast.`,
+    ingredients: [`leftover rice`, `frozen peas + any wilting veg`, `egg, soy or hot sauce`],
+    steps: [`Get the pan screaming hot. Toss in veg and peas first.`, `Add rice, push it around hard until crispy. Scramble in an egg.`, `Hit it with sauce. Plate. Pretend a wok was involved.`],
+    chef: `Stir-fry is just panic with good knife work. You've got this.` },
+  { name: `PB&Honestly Whatever`, tags: ["bread", "peanut butter"], vibe: `the PB&J when the J ran out and standards followed.`,
+    ingredients: [`bread`, `peanut butter`, `jam, honey, sliced banana, or sheer improvisation`],
+    steps: [`Peanut butter one slice. Apply the "and" ingredient to the other.`, `Press together. Cut diagonally if you're feeling regal.`, `Eat. The childhood nostalgia is doing a lot of heavy lifting here.`],
+    chef: `This sandwich raised a generation and asks for nothing in return.` },
+  { name: `Spicy Tuna Rice Bowl (Trying Our Best)`, tags: ["tuna", "rice", "hot sauce"], vibe: `a poke bowl that has never seen the ocean.`,
+    ingredients: [`tuna (canned, be honest)`, `rice`, `hot sauce + mayo = "spicy mayo"`],
+    steps: [`Mix tuna with the spicy mayo. Spoon over warm rice.`, `Add anything green and crunchy to chase the poke-bowl dream.`, `Eat and let the $4 of ingredients deliver $18 of vibes.`],
+    chef: `Tokyo would have questions. We will not be taking them.` },
+  { name: `The Last Tortilla Crisps`, tags: ["tortilla", "cheese"], vibe: `homemade chips from the tortilla on death's door.`,
+    ingredients: [`1 stale tortilla`, `oil or butter`, `salt, plus dip if any survives in the fridge`],
+    steps: [`Cut tortilla into triangles. Pan-fry or bake until crisp and golden.`, `Salt immediately while hot, so it sticks like good news.`, `Dip in salsa, hummus, or sad ketchup. Crunch triumphantly.`],
+    chef: `Turning a sad tortilla into chips is the closest I get to alchemy.` },
+  { name: `Breakfast-for-Dinner Declaration`, tags: ["eggs", "bread", "cheese"], vibe: `it's 8pm and we're having eggs about it.`,
+    ingredients: [`2 eggs`, `toast`, `cheese, plus anything breakfast-shaped`],
+    steps: [`Fry or scramble the eggs. Toast the bread. Melt cheese somewhere in there.`, `Plate it like a diner short-order cook at the end of a long shift.`, `Eat at night, defiantly. Time is fake. Breakfast is a feeling.`],
+    chef: `Breakfast for dinner is a small rebellion and I am fully behind it.` },
+  { name: `The "I Have Nothing" Special`, tags: [], vibe: `for when the fridge is a void and so are you.`,
+    ingredients: [`whatever's left (we both know it's condiments)`, `bread, rice, or noodles if the gods are kind`, `salt, oil, and raw determination`],
+    steps: [`Take inventory. Accept the situation. Grieve briefly.`, `Combine the carb + the fat + the salt. That's a meal. That's the trick.`, `Eat. Add it to the grocery list you won't write. Survive.`],
+    chef: `I ignored your ingredients because you don't have any. Respect the hustle anyway.` },
+];
+
+const DA_OPENERS = [
+  `Okay. Let's hold this plan up to the light and watch it get nervous.`,
+  `I love the confidence. The confidence is the only finished part.`,
+  `Sure. Let's pressure-test this before reality does it for free.`,
+  `Great pitch. Now here's what your future self texts you at 3 AM about it.`,
+  `Bold. Let's find the cliff before you drive off it enthusiastically.`,
+  `Beautiful idea. Let's check if it survives contact with a single follow-up question.`,
+  `Right. Putting on the bad-news hat. It fits perfectly. Concerningly.`,
+  `Cool plan. Let's poke it and see what falls off.`,
+  `I'm not saying no. I'm saying "have you met Tuesday, when motivation leaves."`,
+  `Love it. Let me be the friend who asks the questions your group chat won't.`,
+  `Solid vision. The vision is doing 90% of the work and 0% of the logistics.`,
+  `Okay, genius. Let's see how much of this is plan and how much is vibes.`,
+];
+
+const DA_ROASTS = [
+  `You've budgeted for the best-case version of yourself, who does not exist and never has.`,
+  `This depends on you being motivated on a day you will absolutely not be motivated.`,
+  `There's no step between "start" and "succeed." That step is usually where everyone dies.`,
+  `You planned the fun 10% in detail and waved at the boring 90% that actually matters.`,
+  `Who's doing this when you get bored in week three? Be specific, because it's nobody.`,
+  `This works great until one other human being is involved, and one will be.`,
+  `You're assuming time, money, and energy on the same day. Pick two. Realistically, pick one.`,
+  `What's the plan when the first thing goes wrong? "It won't" is not the plan I'm looking for.`,
+  `You've confused "I want this" with "I have thought about this." They're cousins, not twins.`,
+  `Everyone who's tried this hit the same wall on day five. You're not built different. None of us are.`,
+  `The plan assumes you'll be honest with yourself, which, respectfully, the data does not support.`,
+  `There's a recurring cost here you're treating like a one-time cost. It will find you monthly.`,
+  `You've solved the version that's easy to imagine, not the one that actually shows up.`,
+  `This requires three other people to care as much as you do. They'll care half as much. Once.`,
+  `Your timeline has no buffer. Reality is 80% buffer. You've planned for a week with no Mondays.`,
+  `What happens to this the first time you're tired? Tired is your default state and we both know it.`,
+  `You're outsourcing the hard part to "future me," who is, frankly, even less reliable than current you.`,
+  `There's a single point of failure here and it's you remembering to do the thing.`,
+  `You priced the dream and not the maintenance. The maintenance is where dreams file for divorce.`,
+  `Nobody's accountable here. "I'll just stay disciplined" is the famous last words of every January.`,
+  `This is a great idea for someone with more free time, which you describe as a thing you'll "make."`,
+  `You planned for the launch, not the boring Tuesday six weeks in when the novelty's gone.`,
+  `What's your actual exit if this fails? "It has to work" is a hostage situation, not a strategy.`,
+  `You're counting on willpower. Willpower shows up for the first week and then ghosts.`,
+  `The numbers only work if nothing unexpected happens. The entire history of things is unexpected things.`,
+  `This assumes the people involved behave rationally. Have you met people. Have you met yourself.`,
+  `You've got a goal and a feeling. You're missing the unglamorous middle where the work lives.`,
+  `There's a dependency you don't control, and you're betting it'll be chill. It won't be chill.`,
+  `You'll do this great for two weeks, then a slightly busy week quietly ends the whole project forever.`,
+  `What you call "flexibility," I call "no plan, with extra steps and a nicer word."`,
+  `You're solving for motivation. Solve for what you do when motivation's on vacation — which is most days.`,
+  `This needs consistency, the one ingredient you can't buy, fake, or borrow from a YouTube video.`,
+  `The whole thing hinges on a habit you don't have yet, formed by a person you hope to become next month.`,
+  `You imagined the highlight reel. I'm asking about the bloopers, and the bloopers are the actual footage.`,
+  `There's an "and then it just works" in the middle of this, and it's load-bearing and made of vibes.`,
+  `Your backup plan is the main plan but louder. That's not a backup. That's denial with a megaphone.`,
+  `You assume the cost stays fixed. Costs aren't fixed. Costs always need "just a little more."`,
+  `This is built for the life where nothing else is happening. Something else is always happening.`,
+  `You're planning around your good days. Plan around your worst Tuesday and then we'll talk.`,
+  `Success here depends on you not being a person, and unfortunately you've been one this whole time.`,
+  `Where's the money actually coming from? "It'll pay for itself" has bankrupted more dreams than bad luck.`,
+  `You've got a "phase two," but phase one is a sketch, and phase two is a sketch of a sketch.`,
+  `This assumes you'll remember why you started when it stops being fun. Write it down. You won't otherwise.`,
+  `The plan is fine. The plan's relationship with your calendar is the problem.`,
+  `You're treating "I'll figure it out" as a milestone. It's a coping mechanism in a milestone's clothes.`,
+  `Everyone here is a volunteer, and volunteers are wonderful until literally anything else comes up.`,
+  `You designed this for the person you'll be after you succeed. Design it for the disaster you are now.`,
+  `There's a step that quietly requires you to become a more organized human. That step is doing a lot of unpaid labor.`,
+  `What's the smallest version you could test this week? The full version is a beautiful way to never start.`,
+  `You're in love with the outcome and merely acquainted with the process. The process is who you marry.`,
+];
+
+const DA_VERDICTS = [
+  `Verdict: not a bad idea — but cut it in half, add a deadline, and tell one person who'll mock you if you quit.`,
+  `Verdict: the dream's solid, the plan's a vibe. Build the boring middle before you build anything else.`,
+  `Verdict: do the smallest possible version this week. If you don't, you have your answer about how much you want it.`,
+  `Verdict: workable, IF you assume you'll be lazy and tired and plan around that version of you, not the fantasy one.`,
+  `Verdict: green-lit the second you can tell me what happens when it goes wrong. Until then, it's a wish.`,
+  `Verdict: good bones, no scaffolding. Add accountability, a buffer, and a backup. Then it's dangerous in a good way.`,
+  `Verdict: you don't have a bad plan, you have an optimistic one. Make a pessimistic copy and follow that instead.`,
+  `Verdict: cut the scope by 70%, ship the ugly version, and let reality give you the rest of the plan for free.`,
+  `Verdict: it survives if you build it for your worst day. Right now it's built for a day that comes twice a year.`,
+  `Verdict: promising — but the version in your head is auditioning, and the version that ships gets the part.`,
+  `Verdict: do it, but smaller, sooner, and with someone watching. Ambition without witnesses is a nap with extra steps.`,
+  `Verdict: the idea's worth it. Stop polishing the plan and go collect real-world bruises — those are the instructions.`,
+  `Verdict: 7/10 idea, 3/10 plan, 10/10 confidence. Bring the plan up and the confidence down and you've got something.`,
+  `Verdict: this works the day you stop relying on motivation and start relying on a system so dumb it runs itself.`,
+  `Verdict: honestly? Just start the tiny version today. The plan will improve the second it touches something real.`,
+];
+
+const DA_EXAMPLES = ["start a podcast", "wake up at 5am to work out", "launch a startup", "learn to code in a month", "go fully freelance", "read 50 books this year", "start a YouTube channel", "meal prep every Sunday"];
+
+const EXCUSE_TIERS = ["AIRTIGHT", "PLAUSIBLE", "PUSHING IT", "GAVE UP", "CHAOTIC EVIL"];
+const EXCUSE_CATS = ["Work", "School", "Social", "Family", "Gym", "Date", "Anything"];
+
+const EXCUSES = {
+  Work: [
+    [`I have a medical appointment that was scheduled months ago and can't be moved.`, `There's a family matter I need to handle in person today — I'll be reachable by email.`],
+    [`My internet's been down since this morning and the provider's earliest window is this afternoon.`, `I'm waiting on a delivery I have to sign for and can't leave the apartment.`],
+    [`I think I'm coming down with something and I'd hate to get the whole office sick — being responsible, really.`, `My car's making a noise I don't trust and I'd rather not risk the commute, for everyone's safety.`],
+    [`I'm not going to make it in. I don't have a better sentence than that. We're all adults.`, `Logging off. I gave today an honest 12% and that's all it's getting.`],
+    [`Can't come in — a raccoon has claimed my building's entrance and we are in delicate negotiations.`, `Mercury is in retrograde and my horoscope specifically advised against "spreadsheets and authority figures" today.`],
+  ],
+  School: [
+    [`I had a documented appointment and I've already emailed about making up the work.`, `There was a family emergency over the weekend; I have a note and I'll catch up this week.`],
+    [`The file corrupted when I went to submit — I can show you the timestamp and resend now.`, `I was out sick for two days and I'm still catching up on what I missed.`],
+    [`I did the reading, I just had a lot of "big picture" thoughts and not enough specific ones to write down yet.`, `My printer betrayed me at the exact moment it mattered most, as printers do.`],
+    [`I didn't do it. I had the time. I used the time for other, worse things. Lesson sort of learned.`, `Honestly? I forgot this class existed until 20 minutes ago. We move.`],
+    [`I couldn't submit it because submitting it would mean it was over, and I wasn't ready to let go.`, `My dog didn't eat my homework, but he did watch me not do it, judgmentally, the entire time.`],
+  ],
+  Social: [
+    [`Something came up at home I need to be there for — rain check, I promise, and I mean it.`, `I'm not feeling well and I'd be terrible company tonight. Let's reschedule for when I'm human.`],
+    [`I completely double-booked myself — I'm so sorry, my calendar lied to me.`, `I'm running on no sleep and I'd just be a sad lump in the corner. Saving you from that.`],
+    [`I think I'm getting sick (I'm tired, which is basically the same thing if you don't look closely).`, `My ride fell through and the universe is clearly telling me to stay in. Who am I to argue.`],
+    [`I'm not coming. I was never really coming. We both felt it when I said yes.`, `I've decided to be horizontal tonight and that decision is final and load-bearing.`],
+    [`Can't make it — I've entered my villain-origin-story arc and it requires solitude and dramatic lighting.`, `My plants need me. They didn't say so, but I could feel it. This is bigger than brunch.`],
+  ],
+  Family: [
+    [`I've got a prior commitment I can't move, but let's find another time this week to catch up properly.`, `I'm not feeling great and don't want to bring it to the gathering — I'll call instead.`],
+    [`Work ran long and I'm wiped — can we do the call tomorrow when I can actually be present?`, `I'm dealing with a few things right now and need a quiet night. Nothing's wrong, just tired.`],
+    [`My phone's been acting up (it has not), so if I'm hard to reach this weekend, that's why.`, `I'd love to, but the drive is so long and I'm just so... [gestures vaguely at entire life].`],
+    [`I'm skipping it. I love you all. I cannot do the group setting today. Both are true.`, `Tell everyone I said hi and that I'm "doing great," which is the family password for "please don't ask."`],
+    [`Can't come — I'm emotionally preparing for the next family gathering by skipping this one.`, `I would attend, but Aunt Linda will ask about my career and I'm not legally prepared to answer that yet.`],
+  ],
+  Gym: [
+    [`I'm genuinely sore and pushing through would risk an injury — taking a real recovery day.`, `I've got a scheduling conflict today; I'll move the session to tomorrow and double down.`],
+    [`My knee's been a little off and I don't want to aggravate it before it gets worse.`, `Long day, low fuel — a bad workout now sets me back more than skipping. Rest is training too, etc.`],
+    [`It's a rest day. (It was also a rest day yesterday. Rest is very important to me right now.)`, `I forgot my headphones and I am simply not strong enough to lift without a soundtrack. Tomorrow.`],
+    [`Not going. The gym and I both knew I wasn't going the moment I packed the bag.`, `I worked out by carrying groceries up the stairs. That's cardio AND strength. We're done here.`],
+    [`Can't go — the treadmill and I had a falling out and I refuse to see it again so soon.`, `Skipping to preserve the mystery. If I get fit, what would I complain about? Basically self-care.`],
+  ],
+  Date: [
+    [`Something urgent came up and I have to handle it tonight — I'd really like to reschedule, if you're open.`, `I'm not feeling well and I'd rather meet you at my best. Can we move it to this weekend?`],
+    [`Work threw a last-minute thing at me and I can't get out of it. I'm so sorry — rain check?`, `My day went sideways and I'm not in the right headspace to be good company. Soon, though?`],
+    [`I think I'm coming down with something (nerves, mostly, but let's call it a cold).`, `My friend's having a crisis (the crisis is mine and it's about whether to go on this date).`],
+    [`I'm going to be honest: I'm canceling, and I've workshopped no better way to say it than that.`, `I'm not coming. It's not you. It's the couch. The couch made a compelling counter-offer.`],
+    [`Have to cancel — I just remembered I'm emotionally unavailable and the paperwork is extensive.`, `Can't make it — my horoscope, my dog, and a raccoon all independently advised against it tonight.`],
+  ],
+  Anything: [
+    [`Something came up that I need to deal with — can we reschedule? I'll make it work on my end.`, `I'm not at my best today and want to handle this properly when I can give it full attention.`],
+    [`My day fell apart in a very boring way and I'm playing catch-up. Can we push this?`, `I got my times mixed up — completely my fault. Can we find another slot?`],
+    [`Technology has failed me at the worst possible moment, as is tradition.`, `I'm "running behind," which is a generous way of saying time and I had a disagreement and time won.`],
+    [`I'm not going to be able to do this and I've run out of nicer ways to phrase it.`, `Bowing out. I've allocated today's energy elsewhere, specifically to lying down.`],
+    [`I can't attend — I've been chosen by my cat for an unspecified and urgent purpose.`, `Unfortunately I'll be busy that day staring at the wall, thinking about a conversation from 2014.`],
+  ],
+};
+
+const ACCENTS = { tone: "#c6f135", chef: "#ff7a1a", devil: "#ff2d6f", excuse: "#2fe6ff" };
+const TOOLS = [
+  { key: "tone", label: "Tone Dial", icon: "gauge" },
+  { key: "chef", label: "Chaos Chef", icon: "chefhat" },
+  { key: "devil", label: "Devil's Advocate", icon: "skull" },
+  { key: "excuse", label: "Excuse Engine", icon: "drama" },
+];
+const SUBS = {
+  tone: "Pick a situation, drag the dial from feral to legally-reviewed. Same message, five personalities.",
+  chef: "Open the fridge of despair. We'll make something. 'Food' is a strong word.",
+  devil: "Pitch your plan. I'll find the cliff before you cheerfully drive off it.",
+  excuse: "Pick a victim and a believability level. Plausible deniability, freshly fabricated.",
+};
+
+const ICONS = {
+  gauge: `<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>`,
+  chefhat: `<path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/>`,
+  skull: `<path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/>`,
+  drama: `<path d="M10 11h.01"/><path d="M14 6h.01"/><path d="M18 6h.01"/><path d="M6.5 13.1h.01"/><path d="M22 5c0 9-4 12-6 12s-6-3-6-12c0-2 2-3 6-3s6 1 6 3"/><path d="M17.4 9.9c-.8.8-2 .8-2.8 0"/><path d="M10.1 7.1C9 7.2 7.7 7.7 6 8.6c-3.5 2-4.7 3.9-3.7 5.6 4.5 7.8 9.5 8.4 11.2 7.4.9-.5 1.9-2.1 1.9-4.7"/><path d="M9.1 16.5c.3-1.1 1.4-1.7 2.4-1.4"/>`,
+  dices: `<rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/>`,
+  swords: `<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/>`,
+  rotateccw: `<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>`,
+  sparkles: `<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>`,
+  copy: `<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>`,
+  check: `<path d="M20 6 9 17l-5-5"/>`,
+  flame: `<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>`,
+};
+function icon(name, size) {
+  size = size || 16;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ""}</svg>`;
+}
+
+/* ============================== HELPERS ============================== */
+function randItem(a) { return a[Math.floor(Math.random() * a.length)]; }
+function pickRandom(a, ex) {
+  if (a.length <= 1) return a[0];
+  let n;
+  do { n = a[Math.floor(Math.random() * a.length)]; } while (n === ex);
+  return n;
+}
+function shuffle(a) {
+  const b = a.slice();
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function $(id) { return document.getElementById(id); }
+
+/* ============================== STATE ============================== */
+const state = {
+  tool: "tone",
+  scenarioId: SCENARIOS[0].id,
+  toneLvl: 0,
+  ings: [],
+  recipe: null,
+  plan: "",
+  destroyed: null,
+  cat: "Work",
+  exTier: 0,
+  excuse: EXCUSES.Work[0][0],
+};
+let lastRecipe = null;
+let lastExcuse = EXCUSES.Work[0][0];
+
+const root = $("root");
+
+/* ============================== COPY ============================== */
+function attachCopy(container, text) {
+  const btn = container.querySelector(".tf-copy");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    try {
+      navigator.clipboard.writeText(text).then(function () {
+        btn.classList.add("done");
+        btn.innerHTML = icon("check", 13) + " copied";
+        setTimeout(function () {
+          btn.classList.remove("done");
+          btn.innerHTML = icon("copy", 13) + " copy";
+        }, 1500);
+      }).catch(function () {});
+    } catch (e) {}
+  });
+}
+function placeholder(html) {
+  return `<div class="tf-out"><p class="tf-msg" style="margin:0">${html}</p></div>`;
+}
+function buildTicks(container, labels, active) {
+  container.innerHTML = labels.map(function (l, i) {
+    return `<span class="tf-tick${i === active ? " on" : ""}">${esc(l)}</span>`;
+  }).join("");
+}
+
+/* ============================== TABS ============================== */
+function buildTabs() {
+  const tabs = $("tabs");
+  tabs.innerHTML = "";
+  TOOLS.forEach(function (t) {
+    const b = document.createElement("button");
+    b.className = "tf-tab";
+    b.dataset.key = t.key;
+    b.style.setProperty("--tabc", ACCENTS[t.key]);
+    b.innerHTML = icon(t.icon, 15) + " " + t.label;
+    b.addEventListener("click", function () { setTool(t.key); });
+    tabs.appendChild(b);
+  });
+}
+function setTool(key) {
+  state.tool = key;
+  root.style.setProperty("--accent", ACCENTS[key]);
+  const tabs = $("tabs").children;
+  for (let i = 0; i < tabs.length; i++) tabs[i].classList.toggle("on", tabs[i].dataset.key === key);
+  TOOLS.forEach(function (t) { $("panel-" + t.key).classList.toggle("on", t.key === key); });
+  const tool = TOOLS.find(function (t) { return t.key === key; });
+  $("toolhead").innerHTML =
+    `<div class="lbl">${icon(tool.icon, 13)} ${esc(tool.label.toUpperCase())}</div>` +
+    `<div class="desc">${esc(SUBS[key])}</div>`;
+}
+
+/* ============================== TONE DIAL ============================== */
+function buildTone() {
+  const wrap = $("tone-chips");
+  wrap.innerHTML = "";
+  SCENARIOS.forEach(function (s) {
+    const b = document.createElement("button");
+    b.className = "tf-chip";
+    b.dataset.id = s.id;
+    b.textContent = s.label;
+    b.addEventListener("click", function () { state.scenarioId = s.id; updateToneChips(); renderTone(); });
+    wrap.appendChild(b);
+  });
+  const surprise = $("tone-surprise");
+  surprise.innerHTML = icon("dices", 15) + " Surprise me";
+  surprise.addEventListener("click", function () {
+    const cur = SCENARIOS.find(function (s) { return s.id === state.scenarioId; });
+    state.scenarioId = pickRandom(SCENARIOS, cur).id;
+    updateToneChips(); renderTone();
+  });
+  const range = $("tone-range");
+  range.addEventListener("input", function () {
+    state.toneLvl = Number(range.value);
+    buildTicks($("tone-ticks"), TONE_LEVELS, state.toneLvl);
+    renderTone();
+  });
+  buildTicks($("tone-ticks"), TONE_LEVELS, state.toneLvl);
+}
+function updateToneChips() {
+  const chips = $("tone-chips").children;
+  for (let i = 0; i < chips.length; i++) chips[i].classList.toggle("on", chips[i].dataset.id === state.scenarioId);
+}
+function renderTone() {
+  const sc = SCENARIOS.find(function (s) { return s.id === state.scenarioId; });
+  const msg = sc.levels[state.toneLvl];
+  $("tone-out").innerHTML =
+    `<div class="tf-out"><button class="tf-copy">${icon("copy", 13)} copy</button>` +
+    `<span class="tf-badge">${esc(TONE_LEVELS[state.toneLvl])}</span>` +
+    `<p class="tf-msg"><span class="tf-quote-mark">&ldquo;</span>${esc(msg)}<span class="tf-quote-mark">&rdquo;</span></p></div>`;
+  attachCopy($("tone-out"), msg);
+}
+
+/* ============================== CHAOS CHEF ============================== */
+function buildChef() {
+  const wrap = $("chef-ings");
+  wrap.innerHTML = "";
+  INGREDIENTS.forEach(function (ing) {
+    const b = document.createElement("button");
+    b.className = "tf-chip";
+    b.dataset.ing = ing;
+    b.textContent = ing;
+    b.addEventListener("click", function () {
+      const idx = state.ings.indexOf(ing);
+      if (idx === -1) state.ings.push(ing); else state.ings.splice(idx, 1);
+      b.classList.toggle("on", state.ings.indexOf(ing) !== -1);
+      updateChefHint();
+    });
+    wrap.appendChild(b);
+  });
+  const cook = $("chef-cook");
+  cook.innerHTML = icon("dices", 16) + " Cook something";
+  cook.addEventListener("click", doCook);
+  $("chef-clear").addEventListener("click", function () {
+    state.ings = [];
+    const chips = $("chef-ings").children;
+    for (let i = 0; i < chips.length; i++) chips[i].classList.remove("on");
+    updateChefHint();
+  });
+  updateChefHint();
+  renderRecipe();
+}
+function updateChefHint() {
+  $("chef-hint").textContent = state.ings.length ? state.ings.length + " ingredient(s) selected" : "the chef works with despair";
+  $("chef-clear").style.display = state.ings.length ? "inline-flex" : "none";
+}
+function doCook() {
+  let pool = RECIPES;
+  if (state.ings.length) {
+    const m = RECIPES.filter(function (r) { return r.tags.some(function (t) { return state.ings.indexOf(t) !== -1; }); });
+    if (m.length) pool = m;
+  }
+  const next = pickRandom(pool, lastRecipe);
+  lastRecipe = next; state.recipe = next;
+  renderRecipe();
+}
+function renderRecipe() {
+  const r = state.recipe;
+  const out = $("chef-out");
+  if (!r) { out.innerHTML = placeholder("Hit <b>Cook something</b> and let's see what crime we commit."); return; }
+  const copyText = r.name + "\n\n" + r.vibe + "\n\nYOU'LL NEED:\n- " + r.ingredients.join("\n- ") +
+    "\n\nDO THIS:\n" + r.steps.map(function (s, i) { return (i + 1) + ". " + s; }).join("\n") + "\n\nCHEF: " + r.chef;
+  out.innerHTML =
+    `<div class="tf-out"><button class="tf-copy">${icon("copy", 13)} copy</button>` +
+    `<div class="tf-rname">${esc(r.name)}</div>` +
+    `<p class="tf-vibe">${esc(r.vibe)}</p>` +
+    `<p class="tf-rsub">You'll need</p>` +
+    `<ul class="tf-ul">${r.ingredients.map(function (x) { return `<li>${esc(x)}</li>`; }).join("")}</ul>` +
+    `<p class="tf-rsub">Do this</p>` +
+    `<ol class="tf-ol">${r.steps.map(function (x) { return `<li>${esc(x)}</li>`; }).join("")}</ol>` +
+    `<div class="tf-callout"><span class="who">CHEF'S NOTE</span>${esc(r.chef)}</div></div>`;
+  attachCopy(out, copyText);
+}
+
+/* ============================== DEVIL'S ADVOCATE ============================== */
+function buildDevil() {
+  const input = $("devil-input");
+  input.addEventListener("input", function () { state.plan = input.value; });
+  const ex = $("devil-examples");
+  ex.innerHTML = "";
+  DA_EXAMPLES.forEach(function (p) {
+    const b = document.createElement("button");
+    b.className = "tf-chip";
+    b.textContent = p;
+    b.addEventListener("click", function () { input.value = p; state.plan = p; });
+    ex.appendChild(b);
+  });
+  const destroy = $("devil-destroy");
+  destroy.innerHTML = icon("swords", 16) + " Destroy it";
+  destroy.addEventListener("click", doDestroy);
+  renderDestroyed();
+}
+function doDestroy() {
+  state.destroyed = { opener: randItem(DA_OPENERS), roasts: shuffle(DA_ROASTS).slice(0, 3), verdict: randItem(DA_VERDICTS) };
+  renderDestroyed();
+}
+function renderDestroyed() {
+  const d = state.destroyed;
+  const out = $("devil-out");
+  if (!d) { out.innerHTML = placeholder("Type a plan (or tap one above) and hit <b>Destroy it</b>. I'll be honest. You'll be fine."); return; }
+  const copyText = d.opener + "\n\n" + d.roasts.map(function (r) { return "\u2717 " + r; }).join("\n") + "\n\n" + d.verdict;
+  const planTrim = state.plan.trim();
+  const badge = planTrim
+    ? `<span class="tf-badge">RE: ${esc(planTrim.slice(0, 42))}${planTrim.length > 42 ? "&hellip;" : ""}</span>`
+    : "";
+  out.innerHTML =
+    `<div class="tf-out"><button class="tf-copy">${icon("copy", 13)} copy</button>${badge}` +
+    `<p class="tf-opener">${esc(d.opener)}</p>` +
+    `<ul class="tf-roasts">${d.roasts.map(function (r) { return `<li><span class="x">&#10007;</span><span>${esc(r)}</span></li>`; }).join("")}</ul>` +
+    `<div class="tf-callout"><span class="who">THE VERDICT</span>${esc(d.verdict)}</div></div>`;
+  attachCopy(out, copyText);
+}
+
+/* ============================== EXCUSE ENGINE ============================== */
+function buildExcuse() {
+  const wrap = $("excuse-cats");
+  wrap.innerHTML = "";
+  EXCUSE_CATS.forEach(function (c) {
+    const b = document.createElement("button");
+    b.className = "tf-chip";
+    b.dataset.cat = c;
+    b.textContent = c;
+    b.addEventListener("click", function () { state.cat = c; updateCatChips(); makeExcuse(); });
+    wrap.appendChild(b);
+  });
+  const range = $("excuse-range");
+  range.addEventListener("input", function () {
+    state.exTier = Number(range.value);
+    buildTicks($("excuse-ticks"), EXCUSE_TIERS, state.exTier);
+    makeExcuse();
+  });
+  const roll = $("excuse-roll");
+  roll.innerHTML = icon("rotateccw", 15) + " Another one";
+  roll.addEventListener("click", makeExcuse);
+  buildTicks($("excuse-ticks"), EXCUSE_TIERS, state.exTier);
+  updateCatChips();
+  renderExcuse();
+}
+function updateCatChips() {
+  const chips = $("excuse-cats").children;
+  for (let i = 0; i < chips.length; i++) chips[i].classList.toggle("on", chips[i].dataset.cat === state.cat);
+}
+function makeExcuse() {
+  const pool = EXCUSES[state.cat][state.exTier];
+  const next = pickRandom(pool, lastExcuse);
+  lastExcuse = next; state.excuse = next;
+  renderExcuse();
+}
+function renderExcuse() {
+  $("excuse-out").innerHTML =
+    `<div class="tf-out"><button class="tf-copy">${icon("copy", 13)} copy</button>` +
+    `<span class="tf-badge">${esc(state.cat)} &middot; ${esc(EXCUSE_TIERS[state.exTier])}</span>` +
+    `<p class="tf-msg"><span class="tf-quote-mark">&ldquo;</span>${esc(state.excuse)}<span class="tf-quote-mark">&rdquo;</span></p></div>`;
+  attachCopy($("excuse-out"), state.excuse);
+}
+
+/* ============================== INIT ============================== */
+function init() {
+  $("ic-spark").innerHTML = icon("sparkles", 11);
+  $("ic-flame").innerHTML = icon("flame", 11);
+  buildTabs();
+  buildTone();
+  buildChef();
+  buildDevil();
+  buildExcuse();
+  setTool("tone");
+}
+init();
+</script>
+</body>
+</html>
